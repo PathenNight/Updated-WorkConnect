@@ -7,8 +7,10 @@ router.post('/forgot-password', passwordController.forgotPassword); // Request p
 router.post('/reset-password', passwordController.resetPassword);   // Reset password
 
 // --- Account Recovery Routes ---
-router.post('/recover-by-key', passwordController.recoverByKey);         // Recover account by recovery key
-router.post('/recover-by-email', passwordController.recoverByEmail);     // Recover account by email
-router.post('/verify-answer', passwordController.verifyAnswer);          // Verify security question answer
+router.post('/recover-by-email', passwordController.recoverByEmail);
+router.post('/recover-by-key', passwordController.recoverByKey);
+router.post('/send-otp', passwordController.sendOTP); // Optional
+router.post('/verify-otp', passwordController.verifyOTP); // Optional
+router.post('/verify-answer', passwordController.verifyAnswer);
 
 module.exports = router;

@@ -3,35 +3,64 @@ const pool = require('../config/db'); // Shared connection pool
 const { validateInput } = require('../utils/validation'); // Custom validation utility
 const saltRounds = 10;
 
+const crypto = require('crypto'); // To generate a unique recovery key
+
 // --- User Registration ---
 const register = async (req, res) => {
-    const { email, firstName, lastName, password, role, securityQuestion, securityAnswer } = req.body;
+    const { email, recoveryEmail, phoneNumber, firstName, lastName, password, role, securityQuestion, securityAnswer } = req.body;
 
     try {
         // Validate required fields
-        const validationErrors = validateInput({ email, firstName, lastName, password, securityQuestion, securityAnswer });
+        const validationErrors = validateInput({
+            email,
+            firstName,
+            lastName,
+            password,
+            securityQuestion,
+            securityAnswer,
+        });
         if (validationErrors.length > 0) {
             return res.status(400).json({ errors: validationErrors });
         }
 
         // Check if user already exists
-        const [existingUser] = await pool.query('SELECT * FROM Users WHERE email = ?', [email]);
+        const [existingUser] = await pool.query('SELECT * FROM Users WHERE email = ? OR recoveryEmail = ?', [
+            email,
+            recoveryEmail,
+        ]);
         if (existingUser.length > 0) {
-            return res.status(409).json({ message: 'Email already exists.' });
+            return res.status(409).json({ message: 'Email or recovery email already exists.' });
         }
 
         // Hash password and security answer
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        const hashedAnswer = await bcrypt.hash(securityAnswer, saltRounds);
+        const hashedPassword = await bcrypt.hash(password, 10); // Replace saltRounds with 10 if it's undefined
+        const hashedAnswer = await bcrypt.hash(securityAnswer, 10);
+
+        // Generate recovery key
+        const recoveryKey = crypto.randomBytes(16).toString('hex');
 
         // Insert new user
         const sql = `
-            INSERT INTO Users (email, firstName, lastName, password, role, securityQuestion, securityAnswer)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO Users (email, recoveryEmail, phoneNumber, firstName, lastName, password, role, securityQuestion, securityAnswer, recoveryKey)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        await pool.query(sql, [email, firstName, lastName, hashedPassword, role || 'employee', securityQuestion, hashedAnswer]);
+        await pool.query(sql, [
+            email,
+            recoveryEmail || null,
+            phoneNumber || null,
+            firstName,
+            lastName,
+            hashedPassword,
+            role || 'employee',
+            securityQuestion,
+            hashedAnswer,
+            recoveryKey,
+        ]);
 
-        res.status(201).json({ message: 'User registered successfully.' });
+        res.status(201).json({
+            message: 'User registered successfully.',
+            recoveryKey, // Optionally return the recovery key
+        });
     } catch (error) {
         console.error('Error registering user:', error);
         res.status(500).json({ message: 'Error registering user.' });

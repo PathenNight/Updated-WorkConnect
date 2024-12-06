@@ -97,7 +97,11 @@ const recoverByEmail = async (req, res) => {
     const { email } = req.body;
 
     try {
-        const [user] = await pool.query('SELECT * FROM Users WHERE email = ?', [email]);
+        const [user] = await pool.query(`
+            SELECT * FROM Users 
+            WHERE email = ? OR recoveryEmail = ?
+        `, [email, email]);
+
         if (user.length === 0) {
             return res.status(404).json({ found: false });
         }
@@ -108,6 +112,51 @@ const recoverByEmail = async (req, res) => {
         res.status(500).json({ message: 'Error recovering account.' });
     }
 };
+
+const sendOTP = async (req, res) => {
+    const { phoneNumber } = req.body;
+
+    try {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+        const expiry = new Date(Date.now() + 300000); // Valid for 5 minutes
+
+        const [user] = await pool.query('SELECT * FROM Users WHERE phoneNumber = ?', [phoneNumber]);
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'Phone number not found.' });
+        }
+
+        await pool.query('UPDATE Users SET otp = ?, otpExpiry = ? WHERE phoneNumber = ?', [otp, expiry, phoneNumber]);
+
+        // Use an SMS service to send the OTP (e.g., Twilio)
+        await sendSMS(phoneNumber, `Your OTP is: ${otp}`);
+
+        res.json({ message: 'OTP sent successfully.' });
+    } catch (error) {
+        console.error('Error sending OTP:', error);
+        res.status(500).json({ message: 'Error sending OTP.' });
+    }
+};
+
+const verifyOTP = async (req, res) => {
+    const { phoneNumber, otp } = req.body;
+
+    try {
+        const [user] = await pool.query(`
+            SELECT * FROM Users 
+            WHERE phoneNumber = ? AND otp = ? AND otpExpiry > NOW()
+        `, [phoneNumber, otp]);
+
+        if (user.length === 0) {
+            return res.status(400).json({ message: 'Invalid or expired OTP.' });
+        }
+
+        res.json({ message: 'OTP verified successfully.', email: user[0].email });
+    } catch (error) {
+        console.error('Error verifying OTP:', error);
+        res.status(500).json({ message: 'Error verifying OTP.' });
+    }
+};
+
 
 // --- Verify Security Question Answer ---
 const verifyAnswer = async (req, res) => {
@@ -137,5 +186,7 @@ module.exports = {
     resetPassword,
     recoverByKey,
     recoverByEmail,
+    sendOTP,
+    verifyOTP,
     verifyAnswer
 };

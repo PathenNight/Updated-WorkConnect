@@ -9,17 +9,20 @@ async function createTables() {
             CREATE TABLE IF NOT EXISTS Users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 email VARCHAR(100) NOT NULL UNIQUE,
+                recoveryEmail VARCHAR(100) DEFAULT NULL,
+                phoneNumber VARCHAR(15) DEFAULT NULL,
                 firstName VARCHAR(100) NOT NULL,
                 lastName VARCHAR(100) NOT NULL,
                 password VARCHAR(255) NOT NULL,
                 role ENUM('employee', 'manager', 'admin') DEFAULT 'employee',
+                recoveryKey VARCHAR(255) DEFAULT NULL,
                 securityQuestion VARCHAR(255),
                 securityAnswer VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         `);
-
+        
         // --- RefreshTokens Table ---
         await pool.query(`
             CREATE TABLE IF NOT EXISTS RefreshTokens (
@@ -132,22 +135,36 @@ async function createTables() {
             )
         `);
 
+        // ---Messages Table---
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS Messages (
+                messageID INT AUTO_INCREMENT PRIMARY KEY,
+                senderID INT,
+                recipientID INT,
+                messageContents TEXT NOT NULL,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (senderID) REFERENCES Users(id) ON DELETE SET NULL,
+                FOREIGN KEY (recipientID) REFERENCES Users(id) ON DELETE SET NULL
+            )
+        `);
+        
+
         console.log('All tables created successfully.');
     } catch (err) {
         console.error('Error creating tables:', err.message, err.stack);
-    } finally {
-        pool.end(); // Close the connection pool
+        throw err; // Let the calling code handle the error
     }
 }
 
-// Export the function
 module.exports = createTables;
 
 // Optional: Run this script directly
 if (require.main === module) {
-    createTables().then(() => {
-        console.log('Database setup completed.');
-    }).catch(err => {
-        console.error('Error setting up database:', err);
-    });
+    createTables()
+        .then(() => {
+            console.log('Database setup completed.');
+        })
+        .catch((err) => {
+            console.error('Error setting up database:', err);
+        });
 }
