@@ -1,0 +1,15 @@
+.task-input input {
+    width: calc(100% - 22px);
+    padding: 8px;
+    margin-right: 10px;
+}
+
+.task-input button {
+    padding: 8px 12px;
+}
+
+#taskList {
+    width: 100%;
+    margin-top: 20px;
+    text-align: center;
+}

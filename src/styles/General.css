@@ -1,0 +1,28 @@
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+}
+
+header {
+    padding: 20px;
+    text-align: center;
+}
+
+footer {
+    text-align: center;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4176f6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #4176f6;
+}

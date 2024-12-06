@@ -1,0 +1,10 @@
+# Allow full access to most of the site
+User-agent: *
+Disallow:
+
+# Block access to sensitive directories
+Disallow: /admin/
+Disallow: /api/
+
+# Provide a sitemap location
+Sitemap: https://www.example.com/sitemap.xml

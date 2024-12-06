@@ -1,0 +1,37 @@
+/* buttons.css */
+.btn-primary {
+    height: 56px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-weight: 500;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s ease;
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 1rem;
+    background-color: #4176f6;
+    margin-bottom: 10px;
+}
+
+.btn-option-yes {
+    background: linear-gradient(145deg, #6dbf84, #4f9e61);
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-option-no {
+    background: linear-gradient(145deg, #ff7a7a, #e55c5c);
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+/* Add hover states and additional button styles */

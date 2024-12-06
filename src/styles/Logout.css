@@ -1,0 +1,57 @@
+.logout-page-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(to bottom, #3b5998, #547bbd); /* Blue gradient */
+    color: #fff;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+    animation: fadeInOut 3s forwards; /* Trigger fade-in-out animation */
+}
+
+.logout-message {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+}
+
+.logout-message h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.logout-message p {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.countdown {
+    font-weight: bold;
+    color: #ffc107; /* Golden hue */
+    font-size: 1.2rem;
+}
+
+.app-name {
+    font-style: italic;
+    color: #00c853; /* Green hue */
+    font-weight: bold;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
