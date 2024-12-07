@@ -1,1 +1,1 @@
-Look at Backend Files and Frontend Files to know where to put everything in your files!
+Look at Backend Files, Frontend Files, and Frontend Public files to know where to put everything in your folders!
