@@ -1,21 +1,35 @@
-const Task = require('../models/Task');
-const Project = require('../models/Project');
+const Task = require('../models/Task'); // Updated path to the Task model
 
-exports.createTask = async (req, res) => {
-    const { name, startDate, deadline, projectID } = req.body;
+const createTask = async (req, res) => {
+    const { taskName, taskDate, userId } = req.body;
+
+    if (!taskName || !taskDate || !userId) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
 
     try {
-        const task = new Task(name, null, deadline);
-        task.setActivityProject(projectID); // Link task to a project
-        await task.save();
+        // Step 1: Create a new Task instance
+        const newTask = new Task(taskName, taskDate, userId);
 
-        const project = new Project(); // Fetch or initialize the project
-        project.addTask(task.id);
-        await project.save(); // Save project with updated task list
+        // Step 2: Save the Task to the database
+        await newTask.save();
 
-        res.status(201).json({ message: 'Task created successfully', task });
+        // Respond with success message
+        res.status(201).json({
+            message: 'Task created successfully.',
+            task: {
+                id: newTask.id,
+                name: newTask.name,
+                startDate: newTask.startDate,
+                userId: newTask.userId,
+            },
+        });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error creating task' });
+        console.error('Error creating task:', error);
+        res.status(500).json({ error: 'Failed to create task.' });
     }
+};
+
+module.exports = {
+    createTask,
 };

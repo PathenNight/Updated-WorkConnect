@@ -18,7 +18,7 @@ const TaskForm = ({ onTaskCreated }) => {
         }
 
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/tasks/create`, {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/tasks/create`, {
                 name: taskName,
                 deadline,
                 assignedTo,

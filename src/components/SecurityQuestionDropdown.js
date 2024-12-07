@@ -11,7 +11,7 @@ const SecurityQuestionDropdown = ({ onQuestionSelect }) => {
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
-                const response = await axios.get('/api/auth/security-questions');
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/auth/security-questions`);
                 setQuestions(response.data.questions); // Assuming backend returns a `questions` array
             } catch (error) {
                 console.error('Error fetching security questions:', error);

@@ -12,7 +12,7 @@ const Message = ({ senderID, recipientID }) => {
 
     const fetchMessages = async () => {
         try {
-            const response = await axios.get(`/api/messages/${senderID}/${recipientID}`);
+            const response = await axios.get(`/messages/${senderID}/${recipientID}`);
             setMessages(response.data);
         } catch (error) {
             console.error('Error fetching messages:', error);

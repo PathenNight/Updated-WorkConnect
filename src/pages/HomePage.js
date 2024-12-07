@@ -52,27 +52,35 @@ const HomePage = () => {
             alert('Please select a date to add a task.');
             return;
         }
-
+    
         try {
             const formattedDate = new Date(currentYear, currentMonth, selectedDate)
                 .toISOString()
                 .split('T')[0];
-
-            const response = await fetch(`${API_URL}/api/tasks`, {
+    
+            const userId = sessionStorage.getItem('userId'); // Fetch userId from sessionStorage
+    
+            if (!userId) {
+                console.error('User ID is not set');
+                alert('User is not logged in.');
+                return;
+            }
+    
+            const response = await fetch(`${API_URL}/tasks/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    userId: userID,
                     taskName: taskInput,
                     taskDate: formattedDate,
+                    userId: userId, // Use the retrieved userId
                 }),
             });
-
+    
             if (response.ok) {
                 setTaskInput('');
-                fetchTasks();
+                fetchTasks(); // Refresh task list
             } else {
                 const data = await response.json();
                 console.error('Error adding task:', data);
@@ -81,10 +89,12 @@ const HomePage = () => {
             console.error('Error:', error);
         }
     };
+    
+    
 
     const fetchTasks = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/tasks/${userID}`);
+            const response = await fetch(`${API_URL}/tasks/${userID}`);
             if (response.ok) {
                 const data = await response.json();
                 const tasksByDate = data.tasks.reduce((acc, task) => {

@@ -29,7 +29,7 @@ function RecoveryPage() {
 
         try {
             if (hasRecoveryKey) {
-                const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/recover-by-key`, { recoveryKey: recoveryKey.trim() });
+                const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/recover-by-key`, { recoveryKey: recoveryKey.trim() });
                 if (response.data.found) {
                     setSuccessMessage(`Account found! Your email is: ${response.data.email}.`);
                 } else {

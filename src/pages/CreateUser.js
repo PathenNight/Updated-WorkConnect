@@ -11,22 +11,11 @@ function CreateUser() {
     const [OrganizationName, setOrganizationName] = useState('');
     const [SecurityQuestion, setSecurityQuestion] = useState('');
     const [SecurityAnswer, setSecurityAnswer] = useState('');
-    const [RecoveryKey, setRecoveryKey] = useState('');
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState('');
     const [isAccountCreated, setIsAccountCreated] = useState(false);
 
     const navigate = useNavigate();
-
-    // Generates a unique recovery key
-    const generateRecoveryKey = () => {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let key = '';
-        for (let i = 0; i < 16; i++) {
-            key += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        return key;
-    };
 
     // Redirects to the login page
     const navigateHome = () => {
@@ -56,32 +45,37 @@ function CreateUser() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
-            let uniqueKey = generateRecoveryKey();
-
             try {
-                let keyUnique = false;
-                while (!keyUnique) {
-                    const response = await axios.post(`${process.env.REACT_APP_API_URL}/check-key`, { recoveryKey: uniqueKey });
-                    if (response.data.unique) {
-                        keyUnique = true;
-                    } else {
-                        uniqueKey = generateRecoveryKey(); // Generate a new key if not unique
+                // Split Name into firstName and lastName
+                const [firstName, ...rest] = Name.split(' ');
+                const lastName = rest.join(' ') || '';
+    
+                // Debug: Log the data being sent to the backend
+                console.log('Sending data:', {
+                    email: Email,
+                    firstName: firstName.trim(),
+                    lastName: lastName.trim(),
+                    password: Password,
+                    securityQuestion: SecurityQuestion,
+                    securityAnswer: SecurityAnswer,
+                    role: 'employee', // Default role, if applicable
+                });
+    
+                const response = await axios.post(
+                    `${process.env.REACT_APP_API_URL}/auth/register`,
+                    {
+                        email: Email,
+                        firstName: firstName.trim(),
+                        lastName: lastName.trim(),
+                        password: Password,
+                        securityQuestion: SecurityQuestion,
+                        securityAnswer: SecurityAnswer,
+                        role: 'employee', // Default role, if applicable
                     }
-                }
-
-                await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
-                    Name,
-                    Email,
-                    Password,
-                    OrganizationName,
-                    SecurityQuestion,
-                    SecurityAnswer,
-                    RecoveryKey: uniqueKey,
-                  });
-                  
-
-                setSuccessMessage(`Account created successfully! Your recovery key is:`);
-                setRecoveryKey(uniqueKey);
+                );
+    
+                console.log('Response:', response.data); // Debug: Log the backend response
+                setSuccessMessage(`Account created successfully!`);
                 setIsAccountCreated(true);
                 setName('');
                 setEmail('');
@@ -91,11 +85,19 @@ function CreateUser() {
                 setSecurityAnswer('');
             } catch (err) {
                 console.error('Error creating user:', err.response || err);
-                setErrors({ server: 'Failed to create user. Please try again later.' });
+    
+                // Debug: Log detailed error information
+                if (err.response) {
+                    console.log('Backend error details:', err.response.data);
+                }
+    
+                setErrors({
+                    server: err.response?.data?.message || 'Failed to create user. Please try again later.',
+                });
             }
         }
     };
-
+    
     // Returns to the login page
     const handleReturnToLogin = () => {
         navigate('/');
@@ -184,9 +186,7 @@ function CreateUser() {
                             className="favicon-image"
                         />
                         <h1 className="recovery-message">Account Created Successfully!</h1>
-                        <p className="recovery-message">Your recovery key is:</p>
-                        <strong className="brand-name">{RecoveryKey}</strong>
-                        <p className="recovery-message">Please retain it for future account recovery.</p>
+                        <p className="recovery-message">Please retain your credentials for future login.</p>
                         <button className="btn-primary" onClick={handleReturnToLogin}>
                             Return to Login
                         </button>
